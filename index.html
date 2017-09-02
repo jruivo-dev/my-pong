@@ -103,7 +103,8 @@
             }
 
             //ball
-            colorRect(ballX, ballY, BALL_SIZE, BALL_SIZE, 'green');
+            colorBall(ballX, ballY, 'green');
+            // colorRect(ballX, ballY, BALL_SIZE, BALL_SIZE, 'green');
 
             //left paddle
             colorRect(LIMIT_DISTANCE, paddle1Y, PADDLE_WIDTH, PADDLE_HEIGHT, 'white');
@@ -200,6 +201,14 @@
                 x: (evt.clientX - rect.left) * scaleX, // scale mouse coordinates after they have
                 y: (evt.clientY - rect.top) * scaleY // been adjusted to be relative to element
             }
+        }
+
+        function colorBall(xCenter, yCenter, color) {
+            context.fillStyle = color; //red
+            context.beginPath();
+            context.arc(xCenter, yCenter, BALL_SIZE/2, 0, Math.PI * 2, true);
+            context.closePath();
+            context.fill();
         }
 
         function colorRect(x, y, width, height, color) {
