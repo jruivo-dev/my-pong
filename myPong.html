@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang=" en">
+
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+
+<body>
+    <canvas id="game-canvas" width="1200" height="600"></canvas>
+    <script>
+        const GAME_FPS = 120;
+        const LIMIT_DISTANCE = 25;
+        let canvas;
+        let context;
+
+
+        //score
+        const WINNING_SCORE = 3;
+        let winningScreen = false;
+        let player1Score = 0;
+        let player2Score = 0;
+
+        //paddle
+        const PADDLE_WIDTH = 20;
+        const PADDLE_HEIGHT = 100;
+        let paddle1Y = 250; // canvas.height / 2 - (PADDLE_HEIGHT / 2)
+        let paddle2Y = 250; //  canvas.height / 2 - (PADDLE_HEIGHT / 2)
+
+        //ball ;
+        const BALL_SIZE = 15;
+        let ballX;
+        let ballY;
+        let ballSpeedX = 4;
+        let ballSpeedY = 4;
+
+        window.onload = function () {
+            canvas = document.querySelector('#game-canvas');
+            context = canvas.getContext('2d');
+
+            ballX = canvas.width / 2 - (BALL_SIZE / 2);
+            ballY = canvas.height / 2 - (BALL_SIZE / 2);
+
+
+            canvas.addEventListener('click', resetGame);
+            
+            moveLeftPaddle();
+            setInterval(setGame, 1000 / GAME_FPS);
+        }
+
+
+
+        function setGame() {
+            drawEverything();
+            //if game is over, wait for reset
+            if (winningScreen)
+                return;
+            else
+                moveEverything();
+        }
+
+        function resetGame() {
+            if (winningScreen) {
+
+                player1Score = 0;
+                player2Score = 0;
+                winningScreen = false;
+            }
+        }
+
+        function ballReset() {
+            if (player1Score === WINNING_SCORE || player2Score === WINNING_SCORE)
+                winningScreen = true;
+
+            ballSpeedX = -ballSpeedX;
+            ballSpeedY = -ballSpeedY;
+            ballX = canvas.width / 2 - (BALL_SIZE / 2);
+            ballY = canvas.height / 2 - (BALL_SIZE / 2);
+
+        }
+
+        function drawEverything() {
+
+            //arena
+            context.fillStyle = 'black';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+
+            context.font = '30px Arial';
+            if (winningScreen) {
+                context.fillStyle = 'white';
+
+                if (player1Score >= WINNING_SCORE)
+                    context.fillText(`Human has won`, 200, 50);
+                if (player2Score >= WINNING_SCORE)
+                    context.fillText(`AI won ! `, canvas.width / 2 - 30, 200);
+                context.fillText(`Click to continue...`, canvas.width / 2 - 100, canvas.height - 100);
+                return;
+
+            }
+
+            //ball
+            colorRect(ballX, ballY, BALL_SIZE, BALL_SIZE, 'green');
+
+            //left paddle
+            colorRect(LIMIT_DISTANCE, paddle1Y, PADDLE_WIDTH, PADDLE_HEIGHT, 'white');
+
+            //right paddle
+            colorRect(canvas.width - LIMIT_DISTANCE - PADDLE_WIDTH, paddle2Y, PADDLE_WIDTH, PADDLE_HEIGHT, 'white');
+
+            // player scores
+            context.fillText(`Human: ${player1Score}`, 200, 50);
+            context.fillText(`AI: ${player2Score}`, canvas.width - 200, 50);
+        }
+
+
+
+        function moveEverything() {
+
+            moveRightPaddle();
+            moveBall();
+        }
+
+        function moveRightPaddle() {
+            let paddleCenter = paddle2Y + (PADDLE_HEIGHT / 2);
+
+            //move paddle down if ball is below its center;
+            if (ballY + (BALL_SIZE / 2) > paddleCenter + 20) {
+                paddle2Y += 5;
+            }
+
+            if (ballY + (BALL_SIZE / 2) < paddleCenter - 20) {
+                paddle2Y -= 5;
+            }
+
+            if (paddle2Y <= 0) {
+                paddle2Y = 0;
+            }
+            if (paddle2Y + PADDLE_HEIGHT >= canvas.height)
+                paddle2Y = canvas.height - PADDLE_HEIGHT;
+
+        }
+
+        function moveLeftPaddle() {
+            canvas.addEventListener('mousemove', (e) => {
+                let mousePos = getMousePos(e);
+                paddle1Y = mousePos.y - (PADDLE_HEIGHT / 2);
+                if (paddle1Y <= 0) {
+                    paddle1Y = 0;
+                }
+                if (paddle1Y + PADDLE_HEIGHT >= canvas.height)
+                    paddle1Y = canvas.height - PADDLE_HEIGHT;
+            });
+        }
+
+        function moveBall() {
+
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+
+            //right paddle
+            if (ballX + PADDLE_WIDTH + LIMIT_DISTANCE + BALL_SIZE >= canvas.width) {
+                if (ballY >= paddle2Y && ballY <= (paddle2Y + PADDLE_HEIGHT)) {
+                    ballSpeedX = -ballSpeedX;
+                } else {
+                    player1Score++;
+                    ballReset();
+                }
+            }
+            //left paddle
+            if (ballX - (PADDLE_WIDTH + LIMIT_DISTANCE) <= 0) {
+                if (ballY >= paddle1Y && ballY <= (paddle1Y + PADDLE_HEIGHT)) {
+                    ballSpeedX = -ballSpeedX;
+                } else {
+                    player2Score++;
+                    ballReset();
+                }
+            }
+
+            //top
+            if (ballY + BALL_SIZE >= canvas.height) {
+                ballSpeedY = -ballSpeedY;
+            }
+
+            //bottom
+            if (ballY < 0) {
+                ballSpeedY = -ballSpeedY;
+            }
+        }
+
+        function getMousePos(evt) {
+            var rect = canvas.getBoundingClientRect(), // abs. size of element
+                scaleX = canvas.width / rect.width, // relationship bitmap vs. element for X
+                scaleY = canvas.height / rect.height; // relationship bitmap vs. element for Y
+
+            return {
+                x: (evt.clientX - rect.left) * scaleX, // scale mouse coordinates after they have
+                y: (evt.clientY - rect.top) * scaleY // been adjusted to be relative to element
+            }
+        }
+
+        function colorRect(x, y, width, height, color) {
+            context.fillStyle = color;
+            context.fillRect(x, y, width, height);
+        }
+    </script>
+</body>
+
+</html>
