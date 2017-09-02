@@ -9,7 +9,9 @@
 </head>
 
 <body>
-    <canvas id="game-canvas" width="1200" height="600"></canvas>
+    <div class="container">
+        <canvas id="game-canvas" width="1200" height="600"></canvas>
+    </div>
     <script>
         const GAME_FPS = 120;
         const LIMIT_DISTANCE = 25;
@@ -45,7 +47,7 @@
 
 
             canvas.addEventListener('click', resetGame);
-            
+
             moveLeftPaddle();
             setInterval(setGame, 1000 / GAME_FPS);
         }

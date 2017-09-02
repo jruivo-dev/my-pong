@@ -1,0 +1,16 @@
+body, html {
+    background: #8BB0D2;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+.container {
+    min-height: 100%;
+    height: auto;
+    display: flex;
+}
+
+#game-canvas {
+    margin: auto;
+}
