@@ -35,8 +35,8 @@
         const BALL_SIZE = 15;
         let ballX;
         let ballY;
-        let ballSpeedX = 4;
-        let ballSpeedY = 4;
+        let ballSpeedX = 2;
+        let ballSpeedY = 2;
 
         window.onload = function () {
             canvas = document.querySelector('#game-canvas');
@@ -51,6 +51,7 @@
             moveLeftPaddle();
             setInterval(setGame, 1000 / GAME_FPS);
         }
+
 
 
 
@@ -163,6 +164,10 @@
         function resetBallSpeed() {
             ballSpeedX = 2;
             ballSpeedY = 2;
+        }
+
+        function calculateBallAngle(){
+            
         }
 
         function moveBall() {
